@@ -4,4 +4,3 @@ lib/Foswiki/Plugins/TopicTitlePlugin/Config.spec 0644
 lib/Foswiki/Plugins/TopicTitlePlugin/Core.pm 0644
 lib/Foswiki/Plugins/TopicTitlePlugin/DEPENDENCIES 0644
 lib/Foswiki/Plugins/TopicTitlePlugin.pm 0644
-TIDY 0644
