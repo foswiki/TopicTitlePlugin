@@ -1,0 +1,86 @@
+%META:TOPICINFO{author="ProjectContributor" comment="reprev" date="1523036048" format="1.1" version="1"}%
+---+!! %TOPIC%
+%FORMFIELD{"Description"}%
+
+%TOC%
+
+%JQICON{"fa-warning"}% Note that use of this plugin  Foswiki >= 2.2.0 is not required. The purpose of this plugin is to backport the !TopicTitle feature
+to earlier Foswiki versions.
+
+---++ Description
+
+This plugin implements a way to freely specify the title of a topic. The title is then used when rendering the link to
+the topic instead of just displaying the [[%SYSTEMWEB%.WikiWord]] that represents a topic. So let's recap the differences and the terminology:
+
+   !WikiWord: A !WikiWord consists of two or more words run together, also refered to as camel case capitalization. A !WikiWord creates a hyperlink that points to a topic.
+   !TopicName: This is the name of a topic as it is displayed in the URL. In most cases this is a !WikiWord, but this is not necessarily the case.
+   !TopicTitle: This is a free-form title string that is used as a link text of the !WikiWord pointing to the topic. 
+   !Wikification: This is the process of deriving a !TopicName from a !TopicTitle when creating, moving or renaming a topic. 
+                  Wikification will create a proper !WikiWord and optionally transliterate all non-ascci characters. See [[%SYSTEMWEB%.JQueryWikiWord]].
+   !WebName: This is the last part of the URL pointing to a topic of a web, just before the !TopicName follows. The !WebName of a nested web thus is specified by 
+                  the part removing all parent !WebNames as well as the !TopicName of an URL. For example, given a fully quallified web-topic path such as: =Knowledge.Departments.IT.WebHome=, =IT= is the !WebName
+   !WebTitle: This is the !TopicTitle of the <nop>%HOMETOPIC% of a web. It will be used when rendering the link text in a breadcrumb of a topic of that web, or whenever refering 
+                  to the web, i.e. its <nop>%HOMETOPIC%. For example, given the topic =Knowledge.Departments.IT.WebHome= has got the !TopicTitle "IT Knowledgebase", then the link
+                  =[<nop>[Knowledge.Departments.IT.WebHome]]= will render as =&lt;a href="%SCRIPTURLPATH{"view"}%/Knowledge/Departments/IT/WebHome">IT Knowledgebase&lt;/a>=
+
+---++ Storage of the !TopicTitle
+
+The !TopicTitle is stored in one of two places: 
+
+   1 either in a formfield of a !DataForm named "TopicTitle", 
+   1 or in a preference setting =TOPICTITLE=.
+
+If a !DataForm does _not_ have a formfield "TopicTitle" or no !DataForm at all will the !TopicTitle be stored in the preference setting =TOPICTITLE=.
+You may change the name of the formfield being used as a !TopicTitle using the =TOPICTITLE_FIELD= preference setting to this topic. For example,
+given you specified a !DataForm "SystemForm" with a formfield "SystemName", the set =TOPICTITLE_FIELD= to "SystemName" to store the !TopicTitle in there instead.
+
+Note that in case that the !TopicTitle is identical to its !TopicName no =TOPICTITLE= prefrence will be set.
+
+%JQICON{"fa-warning"}% WARNING: When adding, changing or removing a !DataForm holding a !TopicTitle will it potentially be lost when editing and saving the topic.
+
+---++ Accessing the !TopicTitle
+
+There are multiple ways to read the !TopicTitle:
+
+   * =%<nop>TOPICTITLE%=: expands to the preference setting within a topic
+   * =%<nop>FORMFIELD{"TopicTitle"}%=: read the formfield value
+   * =%<nop>QUERY{"'%<nop>TOPIC%'/preferences[name='TOPICTITLE'].value"}%=: read the preference setting of a topic
+
+depending on where the !TopicTitle is stored. The most compatible way is to use =%<nop>GETTOPICTITLE{...}%=
+
+| *Parameters* | *Description* | *Default* |
+| ="..."= or =topic="..."= | name of the topic to read the title of | current topic |
+| =rev="..."= | revision of the topic | latest revision |
+| =default="..."= | default string to return in case the topic does not have a !TopicTitle | !TopicName |
+| =hideautoinc="on/off"= | boolean to suppress a return value in case the !TopicName matches =...AUTOINC= or =...XXXXXXXXXX= | off |
+| =encode="quotes/url/entity"= | encode the result in the given way. See also [[%SYSTEMWEB%.VarENCODE]] | |
+
+---++ Perl API
+
+This plugin implements =Foswiki::Func::getTopicTitle($web, $topic, $rev)= for Foswiki versions before 2.2.0. You may also access the 
+plugin's API directly using =Foswiki::Plugins::TopicTitlePlugin::getTopicTitle(...)=. 
+
+This plugin sets the =TopicTitleEnabled= context flag that may be used in wiki applications depending on this feature. See [[%SYSTEMWEB%.IfStatements]]
+on how to read the context flags using the =%IF= makro.
+
+---++ Installation Instructions
+%$INSTALL_INSTRUCTIONS%
+
+---++ Dependencies
+%$DEPENDENCIES%
+
+---++ Change History
+
+%TABLE{columnwidths="7em" tablewidth="100%"}%
+| 06 Apr 2018 | initial version |
+
+%META:FORM{name="PackageForm"}%
+%META:FIELD{name="Author" title="Author" value="Michael Daum"}%
+%META:FIELD{name="Version" title="Version" value="%25$VERSION%25"}%
+%META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
+%META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
+%META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2018 Foswiki Contributors"}%
+%META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
+%META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
+%META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%

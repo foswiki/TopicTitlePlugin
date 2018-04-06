@@ -1,0 +1,9 @@
+*,v
+*.swp
+/TopicTitlePlugin.md5
+/TopicTitlePlugin.sha1
+/TopicTitlePlugin.tgz
+/TopicTitlePlugin.txt
+/TopicTitlePlugin.zip
+/TopicTitlePlugin_installer
+/TopicTitlePlugin_installer.pl
