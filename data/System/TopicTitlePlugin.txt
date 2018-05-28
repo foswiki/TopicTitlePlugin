@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" comment="reprev" date="1523036048" format="1.1" version="1"}%
+%META:TOPICINFO{author="ProjectContributor" comment="" date="1527504137" format="1.1" version="1"}%
 ---+!! %TOPIC%
 %FORMFIELD{"Description"}%
 
@@ -72,7 +72,8 @@ on how to read the context flags using the =%IF= makro.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
-| 06 Apr 2018 | initial version |
+|  28 May 2018 | improved parsing of topic and web parameter |
+|  06 Apr 2018 | initial version |
 
 %META:FORM{name="PackageForm"}%
 %META:FIELD{name="Author" title="Author" value="Michael Daum"}%

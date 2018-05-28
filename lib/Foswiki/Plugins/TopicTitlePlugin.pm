@@ -20,63 +20,67 @@ use warnings;
 
 use Foswiki::Func ();
 
-our $VERSION = '1.00';
-our $RELEASE = '06 Apr 2018';
-our $SHORTDESCRIPTION = 'Free-form title for topics';
+our $VERSION           = '1.01';
+our $RELEASE           = '28 May 2018';
+our $SHORTDESCRIPTION  = 'Free-form title for topics';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;
 
-# monkey-patch Func API 
+# monkey-patch Func API
 BEGIN {
-  if ($Foswiki::cfg{Plugins}{TopicTitlePlugin}{Enabled}
-    && !defined(&Foswiki::Func::getTopicTitle))
-  {
-    no warnings 'redefine';
-    *Foswiki::Func::getTopicTitle = \&Foswiki::Plugins::TopicTitlePlugin::getTopicTitle;
-    use warnings 'redefine';
-  } else {
-    #print STDERR "suppressing monkey patching via TopicTitlePlugin\n";
-  }
+    if ( $Foswiki::cfg{Plugins}{TopicTitlePlugin}{Enabled}
+        && !defined(&Foswiki::Func::getTopicTitle) )
+    {
+        no warnings 'redefine';
+        *Foswiki::Func::getTopicTitle =
+          \&Foswiki::Plugins::TopicTitlePlugin::getTopicTitle;
+        use warnings 'redefine';
+    }
+    else {
+        #print STDERR "suppressing monkey patching via TopicTitlePlugin\n";
+    }
 }
 
 sub initPlugin {
 
-  Foswiki::Func::registerTagHandler('TOPICTITLE', sub { return getCore()->TOPICTITLE(@_); });
+    Foswiki::Func::registerTagHandler( 'TOPICTITLE',
+        sub { return getCore()->TOPICTITLE(@_); } );
 
-  # alias
-  Foswiki::Func::registerTagHandler('GETTOPICTITLE', sub { return getCore()->TOPICTITLE(@_); });
+    # alias
+    Foswiki::Func::registerTagHandler( 'GETTOPICTITLE',
+        sub { return getCore()->TOPICTITLE(@_); } );
 
-  # indicate feature
-  Foswiki::Func::getContext()->{TopicTitleEnabled} = 1;
+    # indicate feature
+    Foswiki::Func::getContext()->{TopicTitleEnabled} = 1;
 
-  return 1;
+    return 1;
 }
 
 sub renderWikiWordHandler {
-  return getCore()->renderWikiWordHandler(@_);
+    return getCore()->renderWikiWordHandler(@_);
 }
 
 sub beforeSaveHandler {
-  return getCore()->beforeSaveHandler(@_);
+    return getCore()->beforeSaveHandler(@_);
 }
 
 sub getTopicTitle {
-  return getCore()->getTopicTitle(@_);
+    return getCore()->getTopicTitle(@_);
 }
 
 sub getCore {
-  unless (defined $core) {
-    require Foswiki::Plugins::TopicTitlePlugin::Core;
-    $core = Foswiki::Plugins::TopicTitlePlugin::Core->new();
-  }
-  return $core;
+    unless ( defined $core ) {
+        require Foswiki::Plugins::TopicTitlePlugin::Core;
+        $core = Foswiki::Plugins::TopicTitlePlugin::Core->new();
+    }
+    return $core;
 }
 
 sub finishPlugin {
-  if (defined $core) {
-    $core->finish();
-    undef $core;
-  }
+    if ( defined $core ) {
+        $core->finish();
+        undef $core;
+    }
 }
 
 1;
