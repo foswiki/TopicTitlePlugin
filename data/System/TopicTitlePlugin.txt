@@ -72,6 +72,7 @@ on how to read the context flags using the =%IF= makro.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  14 Aug 2018 | fixed renaming a topic changing subsequent topics being saved during the same request |
 |  28 May 2018 | improved parsing of topic and web parameter |
 |  06 Apr 2018 | initial version |
 

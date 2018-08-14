@@ -18,14 +18,24 @@ package Foswiki::Plugins::TopicTitlePlugin::Core;
 use strict;
 use warnings;
 
-use Foswiki::Func ();
+use Foswiki::Func    ();
+use Foswiki::Plugins ();
 
 use constant TRACE => 0;    # toggle me
 
 sub new {
     my $class = shift;
+    my $session = shift || $Foswiki::Plugins::SESSION;
 
-    my $this = bless( {@_}, $class );
+    my $this = bless(
+        {
+            session   => $session,
+            baseWeb   => $session->{webName},
+            baseTopic => $session->{topicName},
+            @_
+        },
+        $class
+    );
 
     return $this;
 }
@@ -33,11 +43,12 @@ sub new {
 sub finish {
     my $this = shift;
 
-    undef $this->{_cache};
+    undef $this->{cache};
+    undef $this->{session};
 }
 
 sub TOPICTITLE {
-    my ( $this, $session, $params, $topic, $web ) = @_;
+    my ( $this, $params, $topic, $web ) = @_;
 
     my $theWeb = $params->{web} || $web;
     $theWeb =~ s/^\s+|\s+$//g;
@@ -89,12 +100,34 @@ sub renderWikiWordHandler {
     return $topicTitle;
 }
 
+sub afterRenameHandler {
+    my ( $this, $oldWeb, $oldTopic, $oldAttachment, $newWeb, $newTopic,
+        $newAttachment )
+      = @_;
+
+    _writeDebug(
+"called afterRenameHandler(oldWeb=$oldWeb, oldTopic=$oldTopic, newWeb=$newWeb, newTopic=$newTopic)"
+    ) if TRACE;
+
+    # remember the base topic being renamed
+    $this->{baseWeb}   = $newWeb;
+    $this->{baseTopic} = $newTopic;
+}
+
 # This function will store the TopicTitle in a preference variable if it isn't
 # part of the DataForm of this topic.
 sub beforeSaveHandler {
     my ( $this, $text, $topic, $web, $meta ) = @_;
 
     _writeDebug("called beforeSaveHandler($web, $topic)") if TRACE;
+
+    # only treat the base topic
+    unless ( $web eq $this->{baseWeb} && $topic eq $this->{baseTopic} ) {
+        _writeDebug(
+            "... not saving the base $this->{baseWeb}.$this->{baseTopic}")
+          if TRACE;
+        return;
+    }
 
     # find out if we received a TopicTitle
     my $request = Foswiki::Func::getCgiQuery();
@@ -204,7 +237,7 @@ sub getTopicTitle {
 
     $topic ||= $Foswiki::cfg{HomeTopicName};
     my $key = $web . "::" . $topic . "::" . ( $rev // "0" );
-    my $topicTitle = $this->{_cache}{$key};
+    my $topicTitle = $this->{cache}{$key};
     if ( defined $topicTitle ) {
         _writeDebug(
             "... found topicTitle for $key in cache (web='$web', topic='$topic'"
@@ -265,7 +298,7 @@ sub getTopicTitle {
 
     _writeDebug("finally, topicTitle=$topicTitle") if TRACE;
 
-    $this->{_cache}{$key} = $topicTitle;
+    $this->{cache}{$key} = $topicTitle;
     return $topicTitle;
 }
 

@@ -20,8 +20,8 @@ use warnings;
 
 use Foswiki::Func ();
 
-our $VERSION           = '1.01';
-our $RELEASE           = '28 May 2018';
+our $VERSION           = '1.02';
+our $RELEASE           = '14 Aug 2018';
 our $SHORTDESCRIPTION  = 'Free-form title for topics';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;
@@ -44,11 +44,11 @@ BEGIN {
 sub initPlugin {
 
     Foswiki::Func::registerTagHandler( 'TOPICTITLE',
-        sub { return getCore()->TOPICTITLE(@_); } );
+        sub { return getCore(shift)->TOPICTITLE(@_); } );
 
     # alias
     Foswiki::Func::registerTagHandler( 'GETTOPICTITLE',
-        sub { return getCore()->TOPICTITLE(@_); } );
+        sub { return getCore(shift)->TOPICTITLE(@_); } );
 
     # indicate feature
     Foswiki::Func::getContext()->{TopicTitleEnabled} = 1;
@@ -60,6 +60,10 @@ sub renderWikiWordHandler {
     return getCore()->renderWikiWordHandler(@_);
 }
 
+sub afterRenameHandler {
+    return getCore()->afterRenameHandler(@_);
+}
+
 sub beforeSaveHandler {
     return getCore()->beforeSaveHandler(@_);
 }
@@ -69,9 +73,11 @@ sub getTopicTitle {
 }
 
 sub getCore {
+    my $session = shift;
+
     unless ( defined $core ) {
         require Foswiki::Plugins::TopicTitlePlugin::Core;
-        $core = Foswiki::Plugins::TopicTitlePlugin::Core->new();
+        $core = Foswiki::Plugins::TopicTitlePlugin::Core->new($session);
     }
     return $core;
 }
