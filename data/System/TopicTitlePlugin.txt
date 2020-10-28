@@ -4,9 +4,6 @@
 
 %TOC%
 
-%JQICON{"fa-warning"}% Note that use of this plugin  Foswiki >= 2.2.0 is not required. The purpose of this plugin is to backport the !TopicTitle feature
-to earlier Foswiki versions.
-
 ---++ Description
 
 This plugin implements a way to freely specify the title of a topic. The title is then used when rendering the link to
@@ -14,21 +11,25 @@ the topic instead of just displaying the [[%SYSTEMWEB%.WikiWord]] that represent
 
    !WikiWord: A !WikiWord consists of two or more words run together, also refered to as camel case capitalization. A !WikiWord creates a hyperlink that points to a topic.
    !TopicName: This is the name of a topic as it is displayed in the URL. In most cases this is a !WikiWord, but this is not necessarily the case.
-   !TopicTitle: This is a free-form title string that is used as a link text of the !WikiWord pointing to the topic. 
-   !Wikification: This is the process of deriving a !TopicName from a !TopicTitle when creating, moving or renaming a topic. 
+   !TopicTitle: This is a free-form title string that is used as a link text of the !WikiWord pointing to the topic.
+   !Wikification: This is the process of deriving a !TopicName from a !TopicTitle when creating, moving or renaming a topic.
                   Wikification will create a proper !WikiWord and optionally transliterate all non-ascci characters. See [[%SYSTEMWEB%.JQueryWikiWord]].
-   !WebName: This is the last part of the URL pointing to a topic of a web, just before the !TopicName follows. The !WebName of a nested web thus is specified by 
+   !WebName: This is the last part of the URL pointing to a topic of a web, just before the !TopicName follows. The !WebName of a nested web thus is specified by
                   the part removing all parent !WebNames as well as the !TopicName of an URL. For example, given a fully quallified web-topic path such as: =Knowledge.Departments.IT.WebHome=, =IT= is the !WebName
-   !WebTitle: This is the !TopicTitle of the <nop>%HOMETOPIC% of a web. It will be used when rendering the link text in a breadcrumb of a topic of that web, or whenever refering 
+   !WebTitle: This is the !TopicTitle of the <nop>%HOMETOPIC% of a web. It will be used when rendering the link text in a breadcrumb of a topic of that web, or whenever refering
                   to the web, i.e. its <nop>%HOMETOPIC%. For example, given the topic =Knowledge.Departments.IT.WebHome= has got the !TopicTitle "IT Knowledgebase", then the link
                   =[<nop>[Knowledge.Departments.IT.WebHome]]= will render as =&lt;a href="%SCRIPTURLPATH{"view"}%/Knowledge/Departments/IT/WebHome">IT Knowledgebase&lt;/a>=
 
 ---++ Storage of the !TopicTitle
 
-The !TopicTitle is stored in one of two places: 
+The !TopicTitle is stored in one of these places:
 
-   1 either in a formfield of a !DataForm named "TopicTitle", 
+   1 eitehr in a formfield of a !DataForm named "TopicTitle&lt;lang>"
+   1 or in a formfield "TopicTitle",
+   1 or in a preference setting =TOPICTITLE_&lt;lang>=
    1 or in a preference setting =TOPICTITLE=.
+
+(lang: upper case language code, eg. EN or DE)
 
 If a !DataForm does _not_ have a formfield "TopicTitle" or no !DataForm at all will the !TopicTitle be stored in the preference setting =TOPICTITLE=.
 You may change the name of the formfield being used as a !TopicTitle using the =TOPICTITLE_FIELD= preference setting to this topic. For example,
@@ -57,8 +58,8 @@ depending on where the !TopicTitle is stored. The most compatible way is to use 
 
 ---++ Perl API
 
-This plugin implements =Foswiki::Func::getTopicTitle($web, $topic, $rev)= for Foswiki versions before 2.2.0. You may also access the 
-plugin's API directly using =Foswiki::Plugins::TopicTitlePlugin::getTopicTitle(...)=. 
+This plugin implements =Foswiki::Func::getTopicTitle($web, $topic, $rev)= for Foswiki versions before 2.2.0. You may also access the
+plugin's API directly using =Foswiki::Plugins::TopicTitlePlugin::getTopicTitle(...)=.
 
 This plugin sets the =TopicTitleEnabled= context flag that may be used in wiki applications depending on this feature. See [[%SYSTEMWEB%.IfStatements]]
 on how to read the context flags using the =%IF= makro.
@@ -72,6 +73,7 @@ on how to read the context flags using the =%IF= makro.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  01 Apr 2020 | added support for multilingual topic titles |
 |  14 Aug 2018 | fixed renaming a topic changing subsequent topics being saved during the same request |
 |  28 May 2018 | improved parsing of topic and web parameter |
 |  06 Apr 2018 | initial version |
@@ -82,7 +84,7 @@ on how to read the context flags using the =%IF= makro.
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2018 Foswiki Contributors"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2018-2020 Foswiki Contributors"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%
