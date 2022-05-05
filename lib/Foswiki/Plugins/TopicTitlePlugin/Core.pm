@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# TopicTitlePlugin is Copyright (C) 2018-2020 Foswiki Contributors https://foswiki.org
+# TopicTitlePlugin is Copyright (C) 2018-2022 Foswiki Contributors https://foswiki.org
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -69,6 +69,7 @@ sub TOPICTITLE {
   return _quoteEncode($topicTitle) if $theEncoding eq 'quotes';
   return Foswiki::urlEncode($topicTitle) if $theEncoding eq 'url';
   return Foswiki::entityEncode($topicTitle) if $theEncoding eq 'entity';
+  return _safeEncode($topicTitle) if $theEncoding eq 'safe';
 
   return $topicTitle;
 }
@@ -293,6 +294,13 @@ sub _quoteEncode {
 
   $text =~ s/\"/\\"/g;
 
+  return $text;
+}
+
+sub _safeEncode {
+  my $text = shift;
+
+  $text =~ s/([<>%'"])/'&#'.ord($1).';'/ge;
   return $text;
 }
 
