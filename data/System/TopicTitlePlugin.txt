@@ -73,6 +73,7 @@ on how to read the context flags using the =%IF= makro.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  17 Jan 2024 | added perl api to set a topic title |
 |  05 Mar 2022 | add "safe" encoding mode |
 |  01 Apr 2020 | added support for multilingual topic titles |
 |  14 Aug 2018 | fixed renaming a topic changing subsequent topics being saved during the same request |
@@ -85,7 +86,7 @@ on how to read the context flags using the =%IF= makro.
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2018-2022 Foswiki Contributors"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2018-2024 Foswiki Contributors"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%

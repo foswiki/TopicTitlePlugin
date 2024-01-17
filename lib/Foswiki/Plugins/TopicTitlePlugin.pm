@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# TopicTitlePlugin is Copyright (C) 2018-2022 Foswiki Contributors https://foswiki.org
+# TopicTitlePlugin is Copyright (C) 2018-2024 Foswiki Contributors https://foswiki.org
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,9 +20,10 @@ use warnings;
 
 use Foswiki::Func ();
 
-our $VERSION = '2.10';
-our $RELEASE = '05 Mar 2022';
+our $VERSION = '3.0';
+our $RELEASE = '%$RELEASE%';
 our $SHORTDESCRIPTION = 'Free-form title for topics';
+our $LICENSECODE = '%$LICENSECODE%';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;
 
@@ -31,8 +32,9 @@ BEGIN {
   if ($Foswiki::cfg{Plugins}{TopicTitlePlugin}{Enabled}
     && !defined(&Foswiki::Func::getTopicTitle))
   {
-    no warnings 'redefine';
+    no warnings 'redefine'; ## no critic
     *Foswiki::Func::getTopicTitle = \&Foswiki::Plugins::TopicTitlePlugin::getTopicTitle;
+    *Foswiki::Func::setTopicTitle = \&Foswiki::Plugins::TopicTitlePlugin::setTopicTitle;
     use warnings 'redefine';
   } else {
     #print STDERR "suppressing monkey patching via TopicTitlePlugin\n";
@@ -66,6 +68,10 @@ sub beforeSaveHandler {
 
 sub getTopicTitle {
   return getCore()->getTopicTitle(@_);
+}
+
+sub setTopicTitle {
+  return getCore()->setTopicTitle(@_);
 }
 
 sub getCore {
