@@ -20,7 +20,7 @@ use warnings;
 
 use Foswiki::Func ();
 
-our $VERSION = '3.0';
+our $VERSION = '3.10';
 our $RELEASE = '%$RELEASE%';
 our $SHORTDESCRIPTION = 'Free-form title for topics';
 our $LICENSECODE = '%$LICENSECODE%';
@@ -44,9 +44,9 @@ BEGIN {
 sub initPlugin {
 
   Foswiki::Func::registerTagHandler('TOPICTITLE', sub { return getCore(shift)->TOPICTITLE(@_); });
+  Foswiki::Func::registerTagHandler('GETTOPICTITLE', sub { return getCore(shift)->TOPICTITLE(@_); }); # alias
+  Foswiki::Func::registerTagHandler('WIKIWORD', sub { return getCore(shift)->WIKIWORD(@_); });
 
-  # alias
-  Foswiki::Func::registerTagHandler('GETTOPICTITLE', sub { return getCore(shift)->TOPICTITLE(@_); });
 
   # indicate feature
   Foswiki::Func::getContext()->{TopicTitleEnabled} = 1;

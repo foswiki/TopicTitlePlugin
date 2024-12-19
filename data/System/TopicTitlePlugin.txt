@@ -51,10 +51,23 @@ depending on where the !TopicTitle is stored. The most compatible way is to use 
 
 | *Parameters* | *Description* | *Default* |
 | ="..."= or =topic="..."= | name of the topic to read the title of | current topic |
+| =translate="on/off"= | boolean switch to enable/disable translation of the title, either using Foswiki's internal i18n system or [[https://foswiki.org/Extensions/MultiLingualPlugin][MultiLingualPlugin]] if installed | off |
 | =rev="..."= | revision of the topic | latest revision |
 | =default="..."= | default string to return in case the topic does not have a !TopicTitle | !TopicName |
 | =hideautoinc="on/off"= | boolean to suppress a return value in case the !TopicName matches =...AUTOINC= or =...XXXXXXXXXX= | off |
 | =encode="quotes/url/entity/safe"= | encode the result in the given way. See also [[%SYSTEMWEB%.VarENCODE]] | |
+
+---++ Creating a !WikiWord from a random text string
+
+Sometimes you need to create a proper !WikiWord given a free-form text string like the topic title. For example this is the case
+when creating a new topic based on a given topic title. You then need the "wikified" version if the topic title to be used as
+the topic name.
+
+Syntax:
+
+=%<nop>WIKIWORD{"..."}%=
+
+| ="..."= or =text="..."= | random string, may contain formating tokens such as =$percnt= and =$dollar= etc |
 
 ---++ Perl API
 
@@ -73,6 +86,8 @@ on how to read the context flags using the =%IF= makro.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  02 Dec 2024 | adedd =WIKIWORD= macro |
+|  10 Oct 2024 | added translate parameter |
 |  17 Jan 2024 | added perl api to set a topic title |
 |  05 Mar 2022 | add "safe" encoding mode |
 |  01 Apr 2020 | added support for multilingual topic titles |

@@ -20,6 +20,7 @@ use warnings;
 
 use Foswiki::Func ();
 use Foswiki::Plugins ();
+use Text::Unidecode;
 
 use constant TRACE => 0;    # toggle me
 
@@ -46,31 +47,41 @@ sub finish {
   undef $this->{session};
 }
 
+sub WIKIWORD {
+  my ($this, $params, $topic, $web) = @_;
+
+  _writeDebug("called WIKIWORD");
+  my $text = $params->{_DEFAULT} || $params->{text};
+  $text = Foswiki::Func::decodeFormatTokens($text);
+  $text = Foswiki::Func::expandCommonVariables($text, $topic, $web) if $text =~ /%/;
+
+  return _wikify($text);
+}
+
 sub TOPICTITLE {
   my ($this, $params, $topic, $web) = @_;
 
-  #_writeDebug("called TOPICTITLE");
+  _writeDebug("called TOPICTITLE");
 
-  my $theWeb = $params->{web} || $web;
-  $theWeb =~ s/^\s+|\s+$//g;
+  ($web, $topic) = Foswiki::Func::normalizeWebTopicName($params->{web} || $web, $params->{_DEFAULT} || $params->{topic} || $topic);
 
-  my $theTopic = $params->{_DEFAULT} || $params->{topic} || $topic;
-  $theTopic =~ s/^\s+|\s+$//g;
-
-  #_writeDebug("theTopic=$theTopic");
+  #_writeDebug("web=$web, topic=$topic");
 
   my $request = Foswiki::Func::getCgiQuery();
   my $rev = $params->{rev} || $request->param("rev");
-  my $topicTitle = $this->getTopicTitle($theWeb, $theTopic, $rev);
+  my $topicTitle = $this->getTopicTitle($web, $topic, $rev);
   #_writeDebug("topicTitle=$topicTitle");
 
   my $theDefault = $params->{default};
-  if ($topicTitle eq $theTopic && defined($theDefault)) {
+  if ($topicTitle eq $topic && defined($theDefault)) {
     $topicTitle = $theDefault;
   }
 
   my $theHideAutoInc = Foswiki::Func::isTrue($params->{hideautoinc}, 0);
   return '' if $theHideAutoInc && $topicTitle =~ /X{10}|AUTOINC\d/;
+
+  my $doTranslate = Foswiki::Func::isTrue($params->{translate}, 0);
+  $topicTitle = $this->translate($web, $topic, $topicTitle) if $doTranslate;
 
   my $theEncoding = $params->{encode} || '';
   return _quoteEncode($topicTitle) if $theEncoding eq 'quotes';
@@ -82,17 +93,17 @@ sub TOPICTITLE {
 }
 
 sub renderWikiWordHandler {
-  my ($this, $theLinkText, $hasExplicitLinkLabel, $theWeb, $theTopic) = @_;
+  my ($this, $theLinkText, $hasExplicitLinkLabel, $web, $topic) = @_;
 
   return if $hasExplicitLinkLabel;
 
-  #_writeDebug("called renderWikiWordHandler($theLinkText, " . ($hasExplicitLinkLabel ? '1' : '0') . ", $theWeb, $theTopic)");
+  #_writeDebug("called renderWikiWordHandler($theLinkText, " . ($hasExplicitLinkLabel ? '1' : '0') . ", $web, $topic)");
 
-  return if !defined($theWeb) && !defined($theTopic);
+  return if !defined($web) && !defined($topic);
 
   # normalize web name
-  $theWeb =~ s/\//./g;
-  my $topicTitle = $this->getTopicTitle($theWeb, $theTopic);
+  $web =~ s/\//./g;
+  my $topicTitle = $this->getTopicTitle($web, $topic);
 
   #_writeDebug("topicTitle=$topicTitle");
 
@@ -121,7 +132,7 @@ sub beforeSaveHandler {
   undef $this->{cache};
 
   # only treat the base topic
-  unless ($web eq $this->{baseWeb} && $topic eq $this->{baseTopic}) {
+  unless ($web eq $this->{baseWeb} && ($topic eq $this->{baseTopic} || $this->{baseTopic} =~ /X{10}|AUTOINC\d/))  {
     _writeDebug("... not saving the base $this->{baseWeb}.$this->{baseTopic}");
     return;
   }
@@ -229,7 +240,7 @@ sub setTopicTitle {
     my $baseName = $web;
     $baseName =~ s/^.*[\/\.]//;
 
-    if ($title eq $topic || ($topic eq $Foswiki::cfg{HomeTopicName} && ($title eq $web || $title eq $baseName))) {
+    if ($title eq "" || $title eq $topic || ($topic eq $Foswiki::cfg{HomeTopicName} && ($title eq $web || $title eq $baseName))) {
       _writeDebug("removing topicTitle preference");
       $meta->remove("PREFERENCE", $prefName);;
       $mustSave = 1;
@@ -271,7 +282,9 @@ sub getTopicTitle {
   _writeDebug("called getTopicTitle($web, " . ($topic // 'undef') . ", " . ($rev // 'undef') . ", " . ($meta // 'undef') . ")");
 
   $topic ||= $Foswiki::cfg{HomeTopicName};
-  my $key = $web . "::" . $topic . "::" . ($rev // "0");
+
+  my $lang = uc($this->{session}->i18n->language() || 'en');
+  my $key = $web . "::" . $topic . "::" . $lang . "::" . ($rev // "0");
   my $topicTitle = $this->{cache}{$key};
   if (defined $topicTitle) {
     _writeDebug("... found topicTitle for $key in cache (web='$web', topic='$topic'");
@@ -287,8 +300,6 @@ sub getTopicTitle {
     return $topic
       unless Foswiki::Func::checkAccessPermission('VIEW', $wikiName, undef, $topic, $web, $meta);
   }
-
-  my $lang = uc($this->{session}->i18n->language() || 'en');
 
   my $fieldName = $meta->getPreference("TOPICTITLE_FIELD") || "TopicTitle";
   _writeDebug("fieldName=$fieldName");
@@ -334,6 +345,17 @@ sub getTopicTitle {
   return $topicTitle;
 }
 
+sub translate {
+  my ($this, $web, $topic, $string) = @_;
+
+  if (Foswiki::Func::getContext()->{MultiLingualPluginEnabled}) {
+    require Foswiki::Plugins::MultiLingualPlugin;
+    return Foswiki::Plugins::MultiLingualPlugin::translate($string, $web, $topic);
+  } 
+    
+  return $this->{session}->i18n->maketeyt($string);
+}
+
 sub _writeDebug {
 
   #Foswiki::Func::writeDebug("TopicTitlePlugin::Core - $_[0]");
@@ -353,6 +375,41 @@ sub _safeEncode {
 
   $text =~ s/([<>%'"])/'&#'.ord($1).';'/ge;
   return $text;
+}
+
+sub _wikify {
+  my $name = shift;
+
+  $name = _transliterate($name);
+
+  my $wikiWord = '';
+
+  # first, try without forcing each part to be lowercase
+  foreach my $part (split(/[^$Foswiki::regex{mixedAlphaNum}]/, $name)) {
+    $wikiWord .= ucfirst($part);
+  }
+
+  return $wikiWord;
+}
+
+sub _transliterate {
+  my $string = shift;
+
+  # custom ones
+  $string =~ s/\xc4/Ae/go;    # A uml
+  $string =~ s/\xe4/ae/go;    # a uml
+  $string =~ s/\xe6/ae/go;    # ae
+  $string =~ s/\xc6/AE/go;    # AE
+
+  $string =~ s/\xd6/Oe/go;    # O uml
+  $string =~ s/\xf6/oe/go;    # o uml
+  $string =~ s/\xf8/oe/go;    # o stroke
+
+  $string =~ s/\xdc/Ue/go;    # U uml
+  $string =~ s/\xfc/ue/go;    # u uml
+
+  # now go for Text::Unidecode
+  return unidecode($string);
 }
 
 1;
