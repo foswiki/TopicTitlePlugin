@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" comment="" date="1527504137" format="1.1" version="1"}%
+%META:TOPICINFO{author="ProjectContributor" comment="" date="1761386582" format="1.1" version="1"}%
 ---+!! %TOPIC%
 %FORMFIELD{"Description"}%
 
@@ -86,6 +86,8 @@ on how to read the context flags using the =%IF= makro.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  10 Sep 2025 | fixed linking anchors |
+|  20 Feb 2025 | trying to prevent recursion in topic title |
 |  02 Dec 2024 | adedd =WIKIWORD= macro |
 |  10 Oct 2024 | added translate parameter |
 |  17 Jan 2024 | added perl api to set a topic title |
@@ -101,7 +103,7 @@ on how to read the context flags using the =%IF= makro.
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2018-2024 Foswiki Contributors"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2018-2025 Foswiki Contributors"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%

@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# TopicTitlePlugin is Copyright (C) 2018-2024 Foswiki Contributors https://foswiki.org
+# TopicTitlePlugin is Copyright (C) 2018-2025 Foswiki Contributors https://foswiki.org
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -86,7 +86,7 @@ sub TOPICTITLE {
   my $theEncoding = $params->{encode} || '';
   return _quoteEncode($topicTitle) if $theEncoding eq 'quotes';
   return Foswiki::urlEncode($topicTitle) if $theEncoding eq 'url';
-  return Foswiki::entityEncode($topicTitle) if $theEncoding eq 'entity';
+  return Foswiki::entityEncode($topicTitle, ":") if $theEncoding eq 'entity';
   return _safeEncode($topicTitle) if $theEncoding eq 'safe';
 
   return $topicTitle;
@@ -96,18 +96,23 @@ sub renderWikiWordHandler {
   my ($this, $theLinkText, $hasExplicitLinkLabel, $web, $topic) = @_;
 
   return if $hasExplicitLinkLabel;
+  return if $theLinkText =~ /^#/;
 
   #_writeDebug("called renderWikiWordHandler($theLinkText, " . ($hasExplicitLinkLabel ? '1' : '0') . ", $web, $topic)");
+  #print STDERR "called renderWikiWordHandler($theLinkText, " . ($hasExplicitLinkLabel ? '1' : '0') . ", $web, $topic)\n";
 
   return if !defined($web) && !defined($topic);
 
   # normalize web name
   $web =~ s/\//./g;
   my $topicTitle = $this->getTopicTitle($web, $topic);
+  #print STDERR "web=$web, topic=$topic, topicTitle=$topicTitle, baseWeb=$this->{session}{webName}\n";
 
   #_writeDebug("topicTitle=$topicTitle");
 
   return unless defined($topicTitle) && $topicTitle ne $theLinkText;
+  #return "$web.$topic" if $topicTitle eq $topic && $web ne $this->{session}{webName}; # TODO make this configurable, something like LegacyWikiWord
+
   return $topicTitle;
 }
 
@@ -291,6 +296,11 @@ sub getTopicTitle {
     return $topicTitle;
   }
 
+  unless (Foswiki::Func::topicExists($web, $topic)) {
+    $this->{cache}{$key} = $topic;
+    return $topic;
+  }
+
   ($meta) = Foswiki::Func::readTopic($web, $topic, $rev) unless defined $meta;
 
   #_writeDebug("meta: ".$meta->stringify);
@@ -326,11 +336,23 @@ sub getTopicTitle {
     _writeDebug("found topicTitle in local preference: $topicTitle") if $topicTitle;
   }
 
+  # read from a first h1
+  # Item14905: food for thought ... see discussion there
+  # unless ($topicTitle) {
+  #   my $text = $meta->text();
+  #   if ($text =~ m/(?:^---[+]!*\s*([^+].*)$|<h1>(.+)(?=<\/h1))/mi ) {
+  #     $topicTitle = $1 // '';
+  #     _writeDebug("found topictitle in h1: $topicTitle") if $topicTitle;
+  #   }
+  # }
+
   # default to topic name
   $topicTitle ||= $topic;
 
-  $topicTitle =~ s/^\s+|\s+$//g;
+  $topicTitle =~ s/^\s+//g;
+  $topicTitle =~ s/\s+$//g;
   $topicTitle =~ s/<!--.*?-->//g;
+  $topicTitle =~ s/%(?:GET)?TOPICTITLE%//g; # trying to prevent recursion
 
   # if it is WebHome, make it the web's base name
   if ($topicTitle eq $Foswiki::cfg{HomeTopicName}) {
@@ -353,7 +375,7 @@ sub translate {
     return Foswiki::Plugins::MultiLingualPlugin::translate($string, $web, $topic);
   } 
     
-  return $this->{session}->i18n->maketeyt($string);
+  return $this->{session}->i18n->maketext($string);
 }
 
 sub _writeDebug {
@@ -373,7 +395,7 @@ sub _quoteEncode {
 sub _safeEncode {
   my $text = shift;
 
-  $text =~ s/([<>%'"])/'&#'.ord($1).';'/ge;
+  $text =~ s/([<>%'":])/'&#'.ord($1).';'/ge;
   return $text;
 }
 

@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# TopicTitlePlugin is Copyright (C) 2018-2024 Foswiki Contributors https://foswiki.org
+# TopicTitlePlugin is Copyright (C) 2018-2025 Foswiki Contributors https://foswiki.org
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@ use warnings;
 
 use Foswiki::Func ();
 
-our $VERSION = '3.10';
+our $VERSION = '3.20';
 our $RELEASE = '%$RELEASE%';
 our $SHORTDESCRIPTION = 'Free-form title for topics';
 our $LICENSECODE = '%$LICENSECODE%';

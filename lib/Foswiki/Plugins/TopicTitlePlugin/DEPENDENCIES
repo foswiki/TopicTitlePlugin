@@ -1,1 +1,2 @@
+Foswiki::Plugins::MultiLingualPlugin,>=4.00,perl,Optional
 Text::Unidecode,>=1.30,cpan,Required
