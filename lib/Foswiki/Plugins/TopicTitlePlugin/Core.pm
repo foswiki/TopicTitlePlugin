@@ -32,6 +32,8 @@ sub new {
       session => $session,
       baseWeb => $session->{webName},
       baseTopic => $session->{topicName},
+      secureTopicTitles => $Foswiki::cfg{TopicTitlePlugin}{SecureTopicTitles} // $Foswiki::cfg{SecureTopicTitles} // 0,
+      legacyWikiWords =>  $Foswiki::cfg{TopicTitlePlugin}{LegacyWikiWords} // 0,
       @_
     },
     $class
@@ -96,10 +98,10 @@ sub renderWikiWordHandler {
   my ($this, $theLinkText, $hasExplicitLinkLabel, $web, $topic) = @_;
 
   return if $hasExplicitLinkLabel;
-  return if $theLinkText =~ /^#/;
+  return if $theLinkText =~ /^($topic|$web\.$topic)?#/;
 
   #_writeDebug("called renderWikiWordHandler($theLinkText, " . ($hasExplicitLinkLabel ? '1' : '0') . ", $web, $topic)");
-  #print STDERR "called renderWikiWordHandler($theLinkText, " . ($hasExplicitLinkLabel ? '1' : '0') . ", $web, $topic)\n";
+  # print STDERR "called renderWikiWordHandler($theLinkText, " . ($hasExplicitLinkLabel ? '1' : '0') . ", $web, $topic)\n";
 
   return if !defined($web) && !defined($topic);
 
@@ -111,7 +113,7 @@ sub renderWikiWordHandler {
   #_writeDebug("topicTitle=$topicTitle");
 
   return unless defined($topicTitle) && $topicTitle ne $theLinkText;
-  #return "$web.$topic" if $topicTitle eq $topic && $web ne $this->{session}{webName}; # TODO make this configurable, something like LegacyWikiWord
+  return if $this->{legacyWikiWords} && $topicTitle eq $topic && $web ne $this->{session}{webName}; 
 
   return $topicTitle;
 }
@@ -305,7 +307,7 @@ sub getTopicTitle {
 
   #_writeDebug("meta: ".$meta->stringify);
 
-  if ($Foswiki::cfg{SecureTopicTitles}) {
+  if ($this->{secureTopicTitles}) {
     my $wikiName = Foswiki::Func::getWikiName();
     return $topic
       unless Foswiki::Func::checkAccessPermission('VIEW', $wikiName, undef, $topic, $web, $meta);
@@ -346,13 +348,17 @@ sub getTopicTitle {
   #   }
   # }
 
-  # default to topic name
-  $topicTitle ||= $topic;
+  $topicTitle //= "";
 
+  # clean up
   $topicTitle =~ s/^\s+//g;
   $topicTitle =~ s/\s+$//g;
   $topicTitle =~ s/<!--.*?-->//g;
+  $topicTitle =~ s/^%TOPIC%$//g;
   $topicTitle =~ s/%(?:GET)?TOPICTITLE%//g; # trying to prevent recursion
+
+  # default to topic name
+  $topicTitle ||= $topic;
 
   # if it is WebHome, make it the web's base name
   if ($topicTitle eq $Foswiki::cfg{HomeTopicName}) {
