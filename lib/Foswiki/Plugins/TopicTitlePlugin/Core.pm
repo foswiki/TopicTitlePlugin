@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# TopicTitlePlugin is Copyright (C) 2018-2025 Foswiki Contributors https://foswiki.org
+# TopicTitlePlugin is Copyright (C) 2018-2026 Foswiki Contributors https://foswiki.org
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -98,7 +98,7 @@ sub renderWikiWordHandler {
   my ($this, $theLinkText, $hasExplicitLinkLabel, $web, $topic) = @_;
 
   return if $hasExplicitLinkLabel;
-  return if $theLinkText =~ /^($topic|$web\.$topic)?#/;
+  return if $theLinkText =~ /^(\Q$topic\E|\Q$web\E\.\Q$topic\E)?#/;
 
   #_writeDebug("called renderWikiWordHandler($theLinkText, " . ($hasExplicitLinkLabel ? '1' : '0') . ", $web, $topic)");
   # print STDERR "called renderWikiWordHandler($theLinkText, " . ($hasExplicitLinkLabel ? '1' : '0') . ", $web, $topic)\n";
