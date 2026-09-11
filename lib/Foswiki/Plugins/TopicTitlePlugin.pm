@@ -20,7 +20,7 @@ use warnings;
 
 use Foswiki::Func ();
 
-our $VERSION = '3.31';
+our $VERSION = '3.32';
 our $RELEASE = '%$RELEASE%';
 our $SHORTDESCRIPTION = 'Free-form title for topics';
 our $LICENSECODE = '%$LICENSECODE%';

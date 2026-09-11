@@ -65,12 +65,18 @@ sub TOPICTITLE {
 
   _writeDebug("called TOPICTITLE");
 
-  ($web, $topic) = Foswiki::Func::normalizeWebTopicName($params->{web} || $web, $params->{_DEFAULT} || $params->{topic} || $topic);
+  my ($thisWeb, $thisTopic) = Foswiki::Func::normalizeWebTopicName($params->{web} || $web, $params->{_DEFAULT} || $params->{topic} || $topic);
 
   #_writeDebug("web=$web, topic=$topic");
 
-  my $request = Foswiki::Func::getCgiQuery();
-  my $rev = $params->{rev} || $request->param("rev");
+  my $rev = $params->{rev};
+  if ($thisWeb eq $web && $thisTopic eq $topic && !defined($rev)) {
+    my $request = Foswiki::Func::getCgiQuery();
+    $rev = $request->param("rev");
+  }
+  $web = $thisWeb;
+  $topic = $thisTopic;
+
   my $topicTitle = $this->getTopicTitle($web, $topic, $rev);
   #_writeDebug("topicTitle=$topicTitle");
 

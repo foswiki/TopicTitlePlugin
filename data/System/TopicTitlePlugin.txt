@@ -86,6 +86,7 @@ on how to read the context flags using the =%IF= makro.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  10 Apr 2026 | only used the rev urlparam on the current topic |
 |  27 Feb 2026 | be more cautious inserting web and topic parameters into a regular expression |
 |  30 Oct 2025 | adedd ={LegacyWikiWords}= config setting |
 |  10 Sep 2025 | fixed linking anchors |
